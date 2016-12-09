@@ -36,10 +36,9 @@ public class Name {
 		button.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-				
+
 				JLabel generatedNameLabel = new JLabel(generateName(), SwingConstants.CENTER);
 				JOptionPane.showMessageDialog(f.getComponent(0), generatedNameLabel, null, JOptionPane.PLAIN_MESSAGE);
-				
 
 			}
 		});
