@@ -22,6 +22,19 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import java.awt.BorderLayout;
+import java.util.logging.Level;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.Synthesizer;
+import javax.sound.midi.MidiChannel;
+import javax.sound.midi.MidiUnavailableException;
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+
+
+
 public class Metronome extends JFrame {
 	public static void main(String[] args) {
 		Runnable app = new Runnable() {
@@ -42,6 +55,10 @@ public class Metronome extends JFrame {
 		} catch (Exception e) {
 			System.err.println(e);
 		}
+
+		Thread thread;
+		boolean keepPlaying;
+		
 		final JSlider sBPM = new JSlider(JSlider.VERTICAL, 20, 200, 120);
 		sBPM.setPaintLabels(true);
 		sBPM.setPaintTicks(true);
@@ -77,16 +94,22 @@ public class Metronome extends JFrame {
 		pMain.add(sBPM, BorderLayout.EAST);
 		pMain.add(sDuration, BorderLayout.CENTER);
 		JButton bBeats = new JButton("Listen to Beats");
+
 		bBeats.addActionListener(new ActionListener() {
+			boolean hasBeenClicked = true;
+
 			public void actionPerformed(ActionEvent ae) {
+
 				try {
 					generateBeats(sBPM.getValue(), sDuration.getValue());
 				} catch (LineUnavailableException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+
 			}
 		});
+
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(bBeats, BorderLayout.WEST);
 		pMain.add(panel, BorderLayout.NORTH);
@@ -96,51 +119,53 @@ public class Metronome extends JFrame {
 		setLocation(0, 20);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
-		
-		
+
 	}
 
-	
-	
 	public void generateBeats(double bpm, int duration) throws LineUnavailableException {
-		
-		Timer timer = new Timer("MetronomeTimer", true);
-		TimerTask tone = new TimerTask(){
-		     @Override
-		     public void run(){
-		    	 byte[] buf = new byte[ 1 ];;
-				    AudioFormat af = new AudioFormat( (float )44100, 8, 1, true, false );
-				    SourceDataLine sdl = null;
-					try {
-						sdl = AudioSystem.getSourceDataLine( af );
-					} catch (LineUnavailableException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				    try {
-						sdl.open();
-					} catch (LineUnavailableException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				    sdl.start();
-				    for( int i = 0; i < 20 * (float )44100 / 1000; i++ ) {
-				        double angle = i / ( (float )44100 / 440 ) * 2.0 * Math.PI;
-				        buf[ 0 ] = (byte )( Math.sin( angle ) * 100 );
-				        sdl.write( buf, 0, 1 );
-				    }
-				    sdl.drain();
-				    sdl.stop();
-		     }
-		};
-		
+
+	
+	        
+	    
+	        Timer timer = new Timer("MetronomeTimer", true);
+			TimerTask tone = new TimerTask(){
+			     @Override
+			     public void run(){
+			    	 byte[] buf = new byte[ 1 ];;
+					    AudioFormat af = new AudioFormat( (float )44100, 8, 1, true, false );
+					    SourceDataLine sdl = null;
+						try {
+							sdl = AudioSystem.getSourceDataLine( af );
+						} catch (LineUnavailableException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					    try {
+							sdl.open();
+						} catch (LineUnavailableException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					    sdl.start();
+					    for( int i = 0; i < 20 * (float )44100 / 1000; i++ ) {
+					        double angle = i / ( (float )44100 / 440 ) * 2.0 * Math.PI;
+					        buf[ 0 ] = (byte )( Math.sin( angle ) * 100 );
+					        sdl.write( buf, 0, 1 );
+					    }
+					    sdl.drain();
+					    sdl.stop();
+			     }
+			};
+			
 		float tempo;
-		
-		tempo = (float) (1000 * 60 /bpm);
+
+		tempo = (float) (1000 * 60 / bpm);
 		System.out.println(tempo);
-		timer.scheduleAtFixedRate(tone, (long) tempo, (long) tempo); //120 BPM. Executes every 500 ms.
-		
-		
-		  
+		timer.scheduleAtFixedRate(tone, (long) tempo, (long) tempo); // 120 BPM.
+																		// Executes
+																		// every
+																		// 500
+																		// ms.
+
 	}
 }
